@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View, FlatList, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
 import db from '../config'
+import firebase from 'firebase'
 import { ScrollView } from 'react-native-gesture-handler';
 
 
@@ -21,7 +22,7 @@ export default class Searchscreen extends React.Component {
 
       
       if (enteredText[0].toUpperCase() ==='B'){
-      const query = await db.collection("transactions").where('bookId','==',text).startAfter(this.state.lastVisibleTransaction).limit(10).get()
+      const query = await db.collection("transactions").where('bookId','==',text).startAfter(this.state.lastVisibleTransaction).limit(5).get()
       query.docs.map((doc)=>{
         this.setState({
           allTransactions: [...this.state.allTransactions, doc.data()],
@@ -30,7 +31,7 @@ export default class Searchscreen extends React.Component {
       })
     }
       else if(enteredText[0].toUpperCase() === 'S'){
-        const query = await db.collection("transactions").where('bookId','==',text).startAfter(this.state.lastVisibleTransaction).limit(10).get()
+        const query = await db.collection("transactions").where('studentId','==',text).startAfter(this.state.lastVisibleTransaction).limit(5).get()
         query.docs.map((doc)=>{
           this.setState({
             allTransactions: [...this.state.allTransactions, doc.data()],
@@ -41,18 +42,18 @@ export default class Searchscreen extends React.Component {
   }
 
     searchTransactions= async(text) =>{
-      var enteredText = text.split("")  
+      var enteredText = text.split("") // [s,t,u,d,e,n,t] 
       if (enteredText[0].toUpperCase() ==='B'){
-        const transaction =  await db.collection("transactions").where('bookId','==',text).get()
+        const transaction =  await db.collection("transactions").where('bookId','==',text).limit(5).get()
         transaction.docs.map((doc)=>{
           this.setState({
             allTransactions:[...this.state.allTransactions,doc.data()],
             lastVisibleTransaction: doc
           })
         })
-      }
+       }
       else if(enteredText[0].toUpperCase() === 'S'){
-        const transaction = await db.collection('transactions').where('studentId','==',text).get()
+        const transaction = await db.collection('transactions').where('studentId','==',text).limit(5).get()
         transaction.docs.map((doc)=>{
           this.setState({
             allTransactions:[...this.state.allTransactions,doc.data()],
@@ -63,7 +64,7 @@ export default class Searchscreen extends React.Component {
     }
 
     componentDidMount = async ()=>{
-      const query = await db.collection("transactions").limit(10).get()
+      const query = await db.collection("books").limit(10).get()
       query.docs.map((doc)=>{
         this.setState({
           allTransactions: [],
@@ -75,14 +76,8 @@ export default class Searchscreen extends React.Component {
       return (
         <View style={styles.container}>
           <View style={styles.searchBar}>
-        <TextInput 
-          style ={styles.bar}
-          placeholder = "Enter Book Id or Student Id"
-          onChangeText={(text)=>{this.setState({search:text})}}/>
-          <TouchableOpacity
-            style = {styles.searchButton}
-            onPress={()=>{this.searchTransactions(this.state.search)}}
-          >
+        <TextInput style ={styles.bar} placeholder = "Enter Book Id or Student Id"  onChangeText={(text)=>{this.setState({search:text})}}/>
+          <TouchableOpacity style = {styles.searchButton} onPress={()=>{this.searchTransactions(this.state.search)}} >
             <Text>Search</Text>
           </TouchableOpacity>
           </View>
